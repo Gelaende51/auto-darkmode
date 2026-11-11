@@ -69,8 +69,8 @@ run of the script against the value the query above returns.
 
 ## Development thread
 
-Debugged and fixed in this T3 Code thread:
-<t3-thread://v2/86e4e4f1-981d-4600-a3f4-ffcfdbb68262/3a1ace43-bceb-451b-b2af-ae3dcd998076>
+Debugged and fixed in this T3 Code thread (custom scheme, open it in T3 Code):
+`t3-thread://v2/86e4e4f1-981d-4600-a3f4-ffcfdbb68262/3a1ace43-bceb-451b-b2af-ae3dcd998076`
 
 ## License
 
