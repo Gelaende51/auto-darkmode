@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=auto-knight-color
+Comment=Switch the Plasma color scheme between light and dark based on Night Light daylight
+Exec=auto-knight-color
+Icon=application-x-shellscript
+X-KDE-AutostartScript=true

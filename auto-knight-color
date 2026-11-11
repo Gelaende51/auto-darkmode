@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# Name: auto-knight-color
+# Description: This script automatically changes the color scheme of
+# KDE Plasma based on the time of day. It utilizes KDE's built-in
+# Night Light feature to determine whether it is day or night.
+# The script is intended to be autostarted (using the KDE app "Autostart").
+# Author: Dmitriy Safiullin
+# Modified by: terra2o (14.09.2025) – Changes color scheme
+# instead of full theme (so it doesn’t affect icons, cursors, or window decorations)
+# Modified by: elypter (11.11.2026) – resolve qdbus6/qdbus instead of the
+# hardcoded qdbus-qt6, allow LIGHT_SCHEME/DARK_SCHEME overrides
+# If you're using kde-material-you-colors, change:
+# "BreezeDark" -> "MaterialYouDark"
+# "BreezeLight" -> "MaterialYouLight"
+
+# Scheme and command settings
+LIGHT_SCHEME="${LIGHT_SCHEME:-BreezeLight}"
+DARK_SCHEME="${DARK_SCHEME:-BreezeDark}"
+CHANGE_COLOR_COMMAND="${CHANGE_COLOR_COMMAND:-plasma-apply-colorscheme}"
+
+# The Qt6 D-Bus tool ships as qdbus6, qdbus or qdbus-qt6 depending on the
+# distribution. Fedora/others have no qdbus-qt6, which made every daylight
+# query fail and the script treat all times of day as night.
+QDBUS_BIN="$(command -v qdbus6 || command -v qdbus || command -v qdbus-qt6)"
+if [[ -z "$QDBUS_BIN" ]]; then
+    echo "auto-knight-color: no qdbus binary found (tried qdbus6, qdbus, qdbus-qt6)" >&2
+    exit 1
+fi
+
+# Sets scheme and updates state
+set_scheme() {
+    $CHANGE_COLOR_COMMAND "$1"
+    LAST_SCHEME="$1"
+}
+
+# Retrieves current daylight status
+is_daylight() {
+    local daylight_status
+    daylight_status=$("$QDBUS_BIN" org.kde.KWin /org/kde/KWin/NightLight \
+        org.kde.KWin.NightLight.daylight)
+    [[ "$daylight_status" == "true" ]]
+}
+
+# Initializes the scheme based on the current daylight status
+initialize_scheme() {
+    if is_daylight; then
+        set_scheme "$LIGHT_SCHEME"
+    else
+        set_scheme "$DARK_SCHEME"
+    fi
+}
+
+# Monitors changes in daylight status and updates the scheme accordingly
+monitor_daylight_changes() {
+    # shellcheck disable=SC2034  # the line is only a trigger, state is re-queried
+    dbus-monitor --session \
+        "type='signal',interface='org.freedesktop.DBus.Properties', \
+        member='PropertiesChanged', path='/org/kde/KWin/NightLight'" |
+        grep --line-buffered "daylight" |
+        while read -r line; do
+            if is_daylight; then
+                [[ "$LAST_SCHEME" != "$LIGHT_SCHEME" ]] && set_scheme "$LIGHT_SCHEME"
+            else
+                [[ "$LAST_SCHEME" != "$DARK_SCHEME" ]] && set_scheme "$DARK_SCHEME"
+            fi
+        done
+}
+
+initialize_scheme
+monitor_daylight_changes
