@@ -1,7 +1,8 @@
-# auto-knight-color
+# auto-darkmode
 
 Keeps your KDE Plasma color scheme in sync with the time of day — light while the
-sun is up, dark after sunset.
+sun is up, dark after sunset. The script itself is called `auto-knight-color`, after
+the upstream script it is based on.
 
 The script does not schedule anything itself. It reads the `daylight` state that
 KWin's Night Light already computes and follows it:
@@ -35,8 +36,8 @@ window decorations and the Plasma style are left alone.
 ## Install
 
 ```sh
-git clone https://github.com/Gelaende51/auto-knight-color.git
-cd auto-knight-color
+git clone https://github.com/Gelaende51/auto-darkmode.git
+cd auto-darkmode
 ./install.sh
 ```
 
